@@ -4,8 +4,65 @@ var createReactClass = require('create-react-class')
 
 var rows = require('./data.json')
 
+var dimensions = [
+  {value: 'date', title: 'Date'},
+  {value: 'host', title: 'Host'}
+];
+
+var reduce = function(row, memo) {
+  memo.load = (memo.load || 0) + (row.type == 'load' ? 1 : 0);
+  memo.display = (memo.display || 0) + (row.type == 'display' ? 1 : 0);
+  memo.impression = (memo.impression || 0) + (row.type == 'impression' ? 1 : 0);
+  return memo;
+};
+
+var calculations = [
+    {
+      title: 'Impressions',
+      value: function(row) {
+          return row.impression;
+      }
+    },
+    {
+      title: 'Loads',
+      value: function(row) {
+        return row.load;
+      }
+    },
+    {
+      title: 'Display',
+      value: function(row) {
+        return row.display;
+      }
+    },
+    {
+      title: 'LoadRate',
+      value: function(row) {
+        return (row.load / row.impression) * 100;
+      },
+      template: function(val, row) {
+          return val.toFixed(1) + '%';
+      }
+    },
+    {
+      title: 'DisplayRate',
+      value: function(row) {
+        return (row.display / row.load) * 100;
+      },
+      template: function(val, row) {
+          return val.toFixed(1) + '%';
+      }
+    }
+];
+
 module.exports = createReactClass({
   render () {
-    return <div>Report</div>
+    return (<div>
+              <ReactPivot rows={rows}
+                dimensions={dimensions}
+                reduce={reduce}
+                activeDimensions={['Date','Host']}
+                calculations={calculations} />
+          </div>);
   }
 })
